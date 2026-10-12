@@ -8,7 +8,7 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 TARGET = bgi-extractor
-SRCS = src/main.cpp src/arc.cpp src/dsc.cpp src/parser.cpp
+SRCS = src/main.cpp src/arc.cpp src/dsc.cpp src/parser.cpp src/decompressor.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(TARGET)

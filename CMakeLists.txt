@@ -16,6 +16,7 @@ set(SOURCES
     src/arc.cpp
     src/dsc.cpp
     src/parser.cpp
+    src/decompressor.cpp
 )
 
 set(HEADERS
@@ -24,6 +25,7 @@ set(HEADERS
     src/parser.hpp
     src/encoding.hpp
     src/presets.hpp
+    src/decompressor.hpp
 )
 
 add_executable(bgi-extractor ${SOURCES} ${HEADERS})

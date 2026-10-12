@@ -1,37 +1,37 @@
 # bgi-extractor
 
-Fast, standalone CLI tool for extracting scenario scripts, dialogues, character names, choices, and voice IDs from **BGI / Ethornell** visual novel engine games.
+Fast, standalone CLI tool for **decrypting, unpacking, and extracting resources** (scripts, images, audio, dialogues) from **BGI / Ethornell** visual novel engine archives.
 
 [日本語のドキュメント (Japanese README)](#日本語ドキュメント)
 
 ---
 
-## Features
+## Overview
 
-- **Zero External Dependencies**: Built purely with C++17. No heavy third-party libraries required.
-- **Blazing Fast**: Decrypts and disassembles over 60,000+ lines of script in under 300 ms.
-- **Intelligent Dialogue Parsing**:
-  - Automatically correlates character speakers with dialogue lines.
-  - Links voice audio file IDs (e.g. `yuki_000001`) to corresponding spoken lines.
-  - Extracts interactive choices (`[選択肢]`).
-  - Filters out engine control codes, graphics commands, BGM triggers, sound effects, and furigana (ruby) definitions.
-- **Multiple Output Formats**: Supports clean, human-readable plain text (`.txt`) and structured JSON (`.json`).
-- **Flexible Organization**: Generates all-in-one consolidated text, per-archive chapter texts, and individual per-script files.
-- **Cross-Platform**: Fully tested on macOS (Apple Silicon / Intel), Linux, and Windows (MSVC).
+`bgi-extractor` is a modern C++17 command-line tool designed to decrypt and unpack resources from games built with the **BGI (Buriko General Interpreter) / Ethornell** engine.
+
+It handles proprietary archive packing, compression, encryption algorithms, and bytecode parsing without any external dependencies.
+
+### Supported Resource Types & Formats
+- **Archives**: `BURIKO ARC20` (`.arc`)
+- **Scripts**: `DSC FORMAT 1.00` (Adaptive Huffman + LZSS compression) decrypted to `.bss` bytecode.
+- **Images**: `CompressedBG___` (CBG) and `DSC` GRP images decrypted and saved as standard `.bmp`.
+- **Audio**: `BSE 1.0` encryption and `bw  ` audio wrappers unpacked to playable `.ogg` (Ogg Vorbis) and `.wav`.
+- **Dialogue / Text**: Full opcode-level disassembler that correlates speakers, dialogue text, choices, and voice IDs into clean `.txt` or `.json`.
 
 ---
 
-## Tested Games & Compatibility
+## Features
 
-Designed for visual novel titles running on the **BGI (Buriko General Interpreter) / Ethornell** engine:
-
-- **Archive formats**: `BURIKO ARC20`
-- **Compression / Encryption**: `DSC FORMAT 1.00` (Adaptive Huffman + LZSS compression)
-- **Bytecode**: `BurikoCompiledScriptVer1.00`
-
-### Verified Titles:
-- *素晴らしき日々 ～不連続存在～ 15th Anniversary Edition* (*Subarashiki Hibi 15th*)
-- Works with standard BGI / Ethornell script archives (`data01*.arc`, `script.arc`, etc.).
+- **Zero External Dependencies**: Standard C++17 only. No third-party image or audio libraries needed.
+- **Blazing Fast**: Decrypts archives and thousands of resources in milliseconds.
+- **Comprehensive Output Control**:
+  - **Decrypt Mode (`-d`)**: Decrypt all resources to native formats (`.bss`, `.bmp`, `.ogg`, `.wav`).
+  - **Text Mode (`-t`)**: Parse scripts into dialogue text with speaker names and voice IDs.
+  - **Raw Mode (`--raw`)**: Unpack archives without decryption.
+  - **List Mode (`-l`)**: Inspect archive contents, dimensions, audio types, and encryption.
+- **Granular Filters**: Extract only scripts (`--scripts`), images (`--images`), or audio (`--audio`).
+- **Cross-Platform**: Tested on macOS (Apple Silicon & Intel), Linux, and Windows (MSVC).
 
 ---
 
@@ -39,21 +39,19 @@ Designed for visual novel titles running on the **BGI (Buriko General Interprete
 
 ### Prerequisites
 - C++17 compliant compiler (Clang 10+, GCC 9+, or MSVC 2019+)
-- CMake 3.15+ (or simply GNU Make)
-
-### Build with CMake (Recommended)
-```bash
-git clone https://github.com/mirinnano/bgi-extractor.git
-cd bgi-extractor
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
-```
-
-The compiled executable will be located at `build/bgi-extractor` (or `build/Release/bgi-extractor.exe` on Windows).
+- GNU Make or CMake 3.15+
 
 ### Build with Make (macOS / Linux)
 ```bash
+git clone https://github.com/mirinnano/bgi-extractor.git
+cd bgi-extractor
 make -j
+```
+
+### Build with CMake
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
 ```
 
 ---
@@ -64,71 +62,89 @@ make -j
 bgi-extractor [options] <game_directory_or_arc_files...>
 ```
 
-### Command-line Options
+### Actions (Output Control)
 
 | Option | Description |
 |---|---|
-| `-o, --output <dir>` | Specify output directory (default: `./extracted_text`) |
-| `-f, --format <txt|json>` | Output format: `txt` or `json` (default: `txt`) |
-| `--no-voice` | Do not include voice audio IDs in the extracted output |
-| `--no-archive` | Skip generating merged archive/chapter text files |
+| `-d, --decrypt` | **Default**: Decrypt and unpack all resources (`.bss`, `.bmp`, `.ogg`, `.wav`) |
+| `-t, --text` | Parse scripts and extract dialogue text with speakers, choices, and voice IDs |
+| `--raw` | Unpack raw archive contents without decryption |
+| `-l, --list` | List archive files, sizes, and encryption types without extraction |
+
+### Resource Filters (for `-d`)
+
+| Option | Description |
+|---|---|
+| `--scripts` | Extract and decrypt script files only (`.bss`) |
+| `--images` | Extract and decrypt image files only (`.bmp`) |
+| `--audio` | Extract and decrypt audio files only (`.ogg` / `.wav`) |
+
+### Text Options (for `-t`)
+
+| Option | Description |
+|---|---|
+| `-f, --format <txt|json>` | Text output format: `txt` or `json` (default: `txt`) |
+| `--no-voice` | Exclude voice audio IDs from dialogue text |
+| `--no-archive` | Skip generating merged archive text files |
 | `--no-individual` | Skip generating individual per-script text files |
-| `--no-single-file` | Skip generating the single all-in-one consolidated text file |
-| `--no-presets` | Disable built-in game chapter/title presets |
-| `--raw` | Dump decrypted raw script bytecode files (`.bss`) |
-| `-v, --verbose` | Enable verbose diagnostic logging |
+| `--no-single-file` | Skip generating full consolidated text file |
+| `--no-presets` | Disable game-specific chapter/title presets |
+
+### General Options
+
+| Option | Description |
+|---|---|
+| `-o, --output <dir>` | Output directory (default: `./output`) |
+| `-v, --verbose` | Show verbose diagnostic logging |
 | `-h, --help` | Display help and usage information |
-
-### Examples
-
-**Extract entire game directory:**
-```bash
-./bgi-extractor -o ./output /path/to/game_directory
-```
-
-**Extract specific archives with JSON output:**
-```bash
-./bgi-extractor -f json -o ./json_output data01101.arc data01102.arc
-```
 
 ---
 
-## Output Examples
+## Examples
 
-### Plain Text (`.txt`)
+### 1. Decrypt All Resources in an Archive or Directory
+```bash
+# Decrypt all resources to ./output
+./bgi-extractor -o ./output /path/to/game_directory
+
+# Decrypt images only from graphics archive
+./bgi-extractor --images -o ./images sysgrp.arc
+
+# Decrypt voice / BGM audio only
+./bgi-extractor --audio -o ./bgm data05000.arc
+```
+
+### 2. Inspect Archive Contents
+```bash
+./bgi-extractor -l data01101.arc sysgrp.arc
+```
+
+Output:
+```text
+=== Archive: sysgrp.arc (338 entries) ===
+Name                            Size  Type
+-------------------------------------------------------
+SGCG100000                      8299  Image (426x42 32bpp)
+SGCG200000                     40246  Image (1280x960 32bpp)
+...
+```
+
+### 3. Extract Dialogue Text
+```bash
+# Extract scenario text as plain text
+./bgi-extractor -t -o ./text /path/to/game_directory
+
+# Extract scenario text as JSON
+./bgi-extractor -t -f json -o ./json_text data01101.arc
+```
+
+Text Output format:
 ```text
 【由岐】「間宮卓司……」 (yuki_000003)
 【卓司】「なんでこんな所に水上さんがいるの？」 (taku_000001)
-【由岐】「私が何処にいようが関係ない……」 (yuki_000006)
 　街の喧噪の中に立っている時とは打って変わって、ここはとても静かだ……。
 [選択肢] キスする
 [選択肢] そんな事出来ない
-```
-
-### Structured JSON (`.json`)
-```json
-[
-  {
-    "type": "line",
-    "speaker": "由岐",
-    "text": "「間宮卓司……」",
-    "voice": "yuki_000003"
-  },
-  {
-    "type": "line",
-    "speaker": "卓司",
-    "text": "「なんでこんな所に水上さんがいるの？」",
-    "voice": "taku_000001"
-  },
-  {
-    "type": "line",
-    "text": "　街の喧噪の中に立っている時とは打って変わって、ここはとても静かだ……。"
-  },
-  {
-    "type": "choice",
-    "text": "キスする"
-  }
-]
 ```
 
 ---
@@ -136,14 +152,18 @@ bgi-extractor [options] <game_directory_or_arc_files...>
 <a name="日本語ドキュメント"></a>
 ## 日本語ドキュメント
 
-BGI / Ethornell エンジンのゲームアーカイブから、シナリオテキスト、セリフ、話者名、ボイスID、選択肢を高精度に抽出する高速なC++ CLIツールです。
+BGI / Ethornell エンジンのゲームアーカイブから、暗号化リソース（スクリプト、画像、音声）を**復号して展開・出力**する高速なC++ CLIツールです。引数指定により、復号展開、シナリオテキスト抽出、生データ展開、リソース一覧表示など多彩な出力制御が可能です。
 
-### 特徴
-- **外部ライブラリ不要**: C++17標準ライブラリのみで完結。
-- **超高速処理**: 6万行以上のシナリオ全編を約0.3秒で解析・抽出。
-- **高精度なテキスト判定**: オペコードをバイトコードレベルで逆アセンブルし、ルビ定義や画像・演出コマンドなどのシステム制御コードを綺麗に除外。
-- **ボイスID・話者名の紐付け**: `【話者名】「セリフ」 (ボイスID)` の形式で抽出。
-- **TXT / JSON 対応**: 機械処理（自然言語処理・翻訳・スクリプト分析等）に便利なJSONフォーマットもサポート。
+### 主な機能
+- **リソースの自動復号展開 (`-d`)**:
+  - スクリプト: `DSC FORMAT 1.00` を復号して `.bss` バイトコードで保存
+  - 画像: `CBG` / `GRP` 形式を復号して標準の `.bmp` で保存
+  - 音声: `BSE` 暗号化および `bw` ヘッダを解除して純粋な `.ogg` / `.wav` で保存
+- **シナリオテキスト抽出 (`-t`)**:
+  - スクリプト内のオペコードを解析し、セリフ、話者名、ボイスID、選択肢を整形して `.txt` または `.json` で出力。
+- **リソースフィルタ**:
+  - `--scripts`（スクリプトのみ）、`--images`（画像のみ）、`--audio`（音声のみ）で必要なアセットだけを高速抽出可能。
+- **外部依存ゼロ**: C++17標準ライブラリのみで完結。
 
 ---
 

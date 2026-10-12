@@ -5,6 +5,9 @@
 #include <vector>
 
 #if defined(_WIN32) || defined(_WIN64)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #else
 #include <iconv.h>
@@ -48,7 +51,6 @@ inline std::string cp932_to_utf8(std::string_view sjis) {
     iconv_close(cd);
 
     if (res == (size_t)-1 && errno != E2BIG) {
-        // Fallback on conversion error
         return std::string(sjis);
     }
 
