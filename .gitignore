@@ -7,8 +7,8 @@ bin/
 *.dylib
 *.so
 *.dll
-subahibi-extractor
-subahibi-extractor.exe
+bgi-extractor
+bgi-extractor.exe
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
@@ -18,12 +18,14 @@ Makefile.user
 *.arc
 *.bss
 *.txt
+!CMakeLists.txt
 *.json
 *.csv
 output/
 outputs/
 subahibi_text/
 extracted/
+extracted_text/
 
 # IDE / OS
 .DS_Store
