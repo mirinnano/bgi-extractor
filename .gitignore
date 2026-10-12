@@ -1,0 +1,33 @@
+# Build artifacts
+build/
+bin/
+*.o
+*.obj
+*.exe
+*.dylib
+*.so
+*.dll
+subahibi-extractor
+subahibi-extractor.exe
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile.user
+
+# Game & extracted assets (NEVER COMMIT)
+*.arc
+*.bss
+*.txt
+*.json
+*.csv
+output/
+outputs/
+subahibi_text/
+extracted/
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
